@@ -1,0 +1,48 @@
+name: CI
+
+# Triggers: cuándo se ejecuta este workflow.
+on:
+  # Permite lanzar el workflow manualmente desde GitHub
+  workflow_dispatch:
+  # Se ejecuta en cada push a main
+  push:
+    branches:
+      - main
+  # Se ejecuta en cada PR que apunte a main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate app
+    # El runner es una máquina virtual administrada por GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        # Paso para obtener el código fuente del repositorio
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        # Configura la versión de Node.js que usa el proyecto
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        # Instala dependencias limpias según package-lock.json
+        run: npm ci
+
+      - name: Type check
+        # Verifica tipos en TypeScript sin generar archivos
+        run: npx tsc --noEmit
+
+      - name: Lint code
+        # Revisa estilo y errores estáticos según ESLint
+        run: npm run lint
+
+      # Paso futuro opcional para ejecutar tests o builds Expo
+      # - name: Run tests
+      #   run: npm test
